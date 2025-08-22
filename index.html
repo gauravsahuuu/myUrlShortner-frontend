@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>myUrlShortner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0b1020;
+        --bg2: #0a0d1a;
+        --card: #0f172a;
+        --text: #e5e7eb;
+        --muted: #9aa4b2;
+        --accent: #7c3aed;
+        --accent-2: #6d28d9;
+        --ring: rgba(124, 58, 237, 0.35);
+        --ok: #22c55e;
+        --err: #ef4444;
+        --border: rgba(255, 255, 255, 0.08);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
+        color: var(--text);
+        background: radial-gradient(
+            1200px 700px at 10% -10%,
+            #111827 0%,
+            #0c1124 40%,
+            #0a0f20 100%
+          ),
+          var(--bg);
+        display: grid;
+        grid-template-rows: 1fr auto;
+        min-height: 100vh;
+        padding: 24px;
+      }
+      .shell {
+        width: 100%;
+        max-width: 820px;
+        justify-self: center;
+        align-self: center;
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.03),
+          rgba(255, 255, 255, 0.015)
+        );
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        padding: 28px;
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+        backdrop-filter: blur(8px);
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 6px;
+      }
+      .logo {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+        background: conic-gradient(from 210deg, #7c3aed, #22d3ee, #7c3aed);
+        box-shadow: 0 10px 30px rgba(124, 58, 237, 0.45);
+      }
+      .brand h1 {
+        margin: 0;
+        font-size: 32px;
+        letter-spacing: 0.2px;
+        background: linear-gradient(
+          90deg,
+          #c4b5fd 0%,
+          #a78bfa 35%,
+          #60a5fa 70%,
+          #34d399 100%
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        font-weight: 800;
+        text-shadow: 0 2px 20px rgba(124, 58, 237, 0.25);
+      }
+      .sub {
+        margin: 0 0 22px;
+        color: var(--muted);
+      }
+      form {
+        display: grid;
+        gap: 12px;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 10px;
+      }
+      input[type="url"] {
+        width: 100%;
+        padding: 16px 14px;
+        border-radius: 14px;
+        border: 1px solid var(--border);
+        background: var(--bg2);
+        color: var(--text);
+        outline: none;
+        font-size: 15px;
+        transition: box-shadow 0.15s ease, border-color 0.15s ease;
+      }
+      input[type="url"]:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 8px var(--ring);
+      }
+      button.primary {
+        border: none;
+        height: 52px;
+        padding: 0 20px;
+        border-radius: 14px;
+        background: var(--accent);
+        color: white;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 12px 28px rgba(124, 58, 237, 0.35);
+        transition: transform 0.06s ease, background 0.2s ease;
+      }
+      button.primary:hover {
+        background: var(--accent-2);
+      }
+      button.primary:active {
+        transform: translateY(1px);
+      }
+      button.primary[disabled] {
+        opacity: 0.7;
+        cursor: wait;
+      }
+      .msg {
+        min-height: 18px;
+        font-size: 14px;
+      }
+      .msg.ok {
+        color: var(--ok);
+      }
+      .msg.err {
+        color: var(--err);
+      }
+      .result {
+        margin-top: 14px;
+        padding: 14px;
+        border-radius: 14px;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.03);
+        display: none;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .result.show {
+        display: flex;
+      }
+      .short {
+        font-weight: 700;
+        word-break: break-all;
+      }
+      .row-actions {
+        margin-left: auto;
+        display: flex;
+        gap: 8px;
+      }
+      .ghost {
+        height: 40px;
+        padding: 0 12px;
+        border-radius: 12px;
+        background: #0b1327;
+        border: 1px solid var(--border);
+        color: var(--text);
+        cursor: pointer;
+      }
+      .ghost:hover {
+        background: #0a1225;
+      }
+      .list {
+        margin-top: 18px;
+        border-top: 1px dashed var(--border);
+        padding-top: 14px;
+      }
+      .list h3 {
+        margin: 2px 0 12px;
+        font-size: 14px;
+        color: var(--muted);
+      }
+      .item {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        padding: 8px 10px;
+        border-radius: 10px;
+      }
+      .item:hover {
+        background: rgba(255, 255, 255, 0.03);
+      }
+      .link {
+        color: #93c5fd;
+        text-decoration: none;
+        word-break: break-all;
+      }
+      .badge {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      footer {
+        margin-top: 24px;
+        text-align: center;
+        color: var(--muted);
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M10.5 13.5l3-3"
+              stroke="#fff"
+              stroke-width="2"
+              stroke-linecap="round"
+            />
+            <path
+              d="M13.06 6.94l2.12-2.12a3 3 0 0 1 4.24 4.24l-2.12 2.12M10.94 17.06l-2.12 2.12a3 3 0 1 1-4.24-4.24l2.12-2.12"
+              stroke="#fff"
+              stroke-opacity=".9"
+              stroke-width="2"
+              stroke-linecap="round"
+            />
+          </svg>
+        </div>
+        <h1>myUrlShortner</h1>
+      </div>
+      <p class="sub">
+        Turn long links into neat short ones. Uses your public API to create an
+        <code>id</code> and shows
+        <code>https://my-url-shortner-1n5l.onrender.com/&lt;id&gt;</code>.
+      </p>
+
+      <form id="form">
+        <div class="row">
+          <input
+            id="urlInput"
+            type="url"
+            placeholder="https://example.com/very/long/link"
+            required
+          />
+          <button id="submitBtn" class="primary" type="submit">Shorten</button>
+        </div>
+        <div id="msg" class="msg"></div>
+      </form>
+
+      <div id="result" class="result" aria-live="polite">
+        <div>
+          <div class="badge">Your short URL</div>
+          <div id="shortText" class="short"></div>
+        </div>
+        <div class="row-actions">
+          <button id="openBtn" class="ghost" type="button">Open</button>
+          <button id="copyBtn" class="ghost" type="button">Copy</button>
+        </div>
+      </div>
+
+      <div class="list">
+        <h3>Recent (local)</h3>
+        <div id="recent"></div>
+      </div>
+    </div>
+
+    <footer>Developed by Gaurav Sahu</footer>
+
+    <script>
+      // Public API + Short-link base (same Render domain)
+      const API_BASE = "https://my-url-shortner-1n5l.onrender.com";
+      const SHORT_BASE = "https://my-url-shortner-1n5l.onrender.com";
+
+      const form = document.getElementById("form");
+      const input = document.getElementById("urlInput");
+      const msg = document.getElementById("msg");
+      const resultBox = document.getElementById("result");
+      const shortText = document.getElementById("shortText");
+      const copyBtn = document.getElementById("copyBtn");
+      const openBtn = document.getElementById("openBtn");
+      const submitBtn = document.getElementById("submitBtn");
+      const recent = document.getElementById("recent");
+
+      function isValidHttpUrl(v) {
+        try {
+          const u = new URL(v);
+          return u.protocol === "http:" || u.protocol === "https:";
+        } catch {
+          return false;
+        }
+      }
+
+      function addRecent(longUrl, shortUrl) {
+        const key = "myurl_recent";
+        const arr = JSON.parse(localStorage.getItem(key) || "[]");
+        arr.unshift({ longUrl, shortUrl, t: Date.now() });
+        localStorage.setItem(key, JSON.stringify(arr.slice(0, 5)));
+        renderRecent();
+      }
+
+      function renderRecent() {
+        const key = "myurl_recent";
+        const arr = JSON.parse(localStorage.getItem(key) || "[]");
+        recent.innerHTML = "";
+        if (!arr.length) {
+          recent.innerHTML = '<div class="badge">No items yet</div>';
+          return;
+        }
+        arr.forEach((it) => {
+          const row = document.createElement("div");
+          row.className = "item";
+          row.innerHTML = `
+          <a class="link" href="${it.shortUrl}" target="_blank">${
+            it.shortUrl
+          }</a>
+          <span class="badge" title="${it.longUrl}">→ ${
+            new URL(it.longUrl).hostname
+          }</span>
+        `;
+          recent.appendChild(row);
+        });
+      }
+      renderRecent();
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        msg.textContent = "";
+        msg.className = "msg";
+        resultBox.classList.remove("show");
+
+        const longUrl = input.value.trim();
+        if (!isValidHttpUrl(longUrl)) {
+          msg.textContent =
+            "Enter a valid URL starting with http:// or https://";
+          msg.classList.add("err");
+          return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Working…";
+        try {
+          // POST { url } to your public API
+          const res = await fetch(`${API_BASE}/url`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url: longUrl }),
+          });
+
+          const ct = res.headers.get("content-type") || "";
+          const data = ct.includes("application/json")
+            ? await res.json()
+            : { text: await res.text() };
+
+          if (!res.ok) {
+            msg.textContent = data?.error || data?.text || `HTTP ${res.status}`;
+            msg.classList.add("err");
+            return;
+          }
+
+          // Build the short link on the Render domain
+          const shortUrl = new URL(`/${data.id}`, SHORT_BASE).toString();
+
+          shortText.textContent = shortUrl;
+          resultBox.classList.add("show");
+          msg.textContent = "Done";
+          msg.classList.add("ok");
+
+          openBtn.onclick = () => window.open(shortUrl, "_blank");
+          copyBtn.onclick = async () => {
+            try {
+              await navigator.clipboard.writeText(shortUrl);
+              copyBtn.textContent = "Copied!";
+              setTimeout(() => (copyBtn.textContent = "Copy"), 900);
+            } catch {
+              const ta = document.createElement("textarea");
+              ta.value = shortUrl;
+              document.body.appendChild(ta);
+              ta.select();
+              document.execCommand("copy");
+              document.body.removeChild(ta);
+              copyBtn.textContent = "Copied!";
+              setTimeout(() => (copyBtn.textContent = "Copy"), 900);
+            }
+          };
+
+          addRecent(longUrl, shortUrl);
+        } catch (err) {
+          console.error(err);
+          msg.textContent =
+            "Network error. Check CORS on the API or try again.";
+          msg.classList.add("err");
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Shorten";
+        }
+      });
+    </script>
+  </body>
+</html>
